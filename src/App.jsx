@@ -1,3 +1,4 @@
+// Trigger build baru
 import { useEffect, useState } from 'react';
 
 function App() {
