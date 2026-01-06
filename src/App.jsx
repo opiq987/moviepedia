@@ -4,21 +4,27 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null); // State untuk menyimpan film yang diklik
+  const [page, setPage] = useState(1);
   
   const API_KEY = "8c25e3f10a23f8e4125ea64406f6a013"; 
 
-  const getMovies = async (query = "") => {
-    try {
-      const url = query 
-        ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
-        : `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.results) setMovies(data.results);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+  const getMovies = async (query = "", pageNumber = 1) => {
+  try {
+    const url = query 
+      ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}&page=${pageNumber}`
+      : `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${pageNumber}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.results) {
+      // Jika halaman 1, ganti list. Jika halaman > 1, gabungkan (append)
+      setMovies(prev => pageNumber === 1 ? data.results : [...prev, ...data.results]);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
 
   useEffect(() => { getMovies(); }, []);
 
@@ -50,6 +56,21 @@ function App() {
             </div>
           </div>
         ))}
+                    {/* Tombol Load More */}
+{!search && (
+  <div className="flex justify-center pb-10">
+    <button 
+      onClick={() => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        getMovies("", nextPage);
+      }}
+      className="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-full font-bold transition-all shadow-lg shadow-blue-500/20"
+    >
+      Muat Lebih Banyak Film
+    </button>
+  </div>
+)}
       </main>
 
       {/* --- MODAL DETAIL FILM (Akan muncul jika selectedMovie tidak null) --- */}
